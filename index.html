@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rent Work</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f4f7fa;--card:#fff;--ink:#13293d;--mut:#5d6f80;--line:#dbe4ec;--sea:#1b6ca8;--sky:#e3eef7;--ok:#1f8a5f;--bad:#c4402f;--amb:#e9a820;--on:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a26;--card:#15263a;--ink:#e8f0f7;--mut:#93a8bb;--line:#26394e;--sea:#5aa7e0;--sky:#1b3550;--ok:#4cc08f;--bad:#ef7b6b;--on:#0e1a26;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a26;--card:#15263a;--ink:#e8f0f7;--mut:#93a8bb;--line:#26394e;--sea:#5aa7e0;--sky:#1b3550;--ok:#4cc08f;--bad:#ef7b6b;--on:#0e1a26;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:20px 16px 0;max-width:1000px;margin:0 auto}
+h1{margin:0;font-size:1.5rem;font-weight:800;letter-spacing:-.01em}
+header p{margin:2px 0 14px;color:var(--mut);font-size:.9rem}
+nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+nav button{flex:none;background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);font:inherit;font-weight:500;padding:10px 12px;cursor:pointer}
+nav button[aria-current="true"]{color:var(--ink);border-color:var(--sea);font-weight:700}
+main{max-width:1000px;margin:0 auto;padding:18px 16px 48px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.stat b{display:block;font-size:1.9rem;font-weight:800;line-height:1.1}
+.stat span{color:var(--mut);font-size:.85rem}
+.stat.big{background:var(--sea);border-color:var(--sea);color:var(--on)}
+.stat.big span{color:inherit;opacity:.85}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{margin:0 0 12px;font-size:1.05rem}
+.bar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:.9rem}
+.bar i{display:block;height:12px;background:var(--sea);border-radius:3px;min-width:4px}
+.bar span:first-child{width:110px;flex:none}
+.occ{display:flex;height:16px;border-radius:4px;overflow:hidden;background:var(--sky);margin:6px 0}
+.occ i{background:var(--ok)}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:500;color:var(--mut)}
+input,select{font:inherit;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);min-height:44px}
+.btn{font:inherit;font-weight:700;background:var(--sea);color:var(--on);border:0;border-radius:6px;padding:10px 16px;min-height:44px;cursor:pointer}
+.btn.ghost{background:none;color:var(--sea);border:1px solid var(--sea)}
+.btn.sm{min-height:34px;padding:4px 10px;font-size:.85rem}
+.btn.del{background:none;color:var(--bad);border:1px solid var(--bad)}
+.tools{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tools input{flex:1;min-width:180px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mut);font-weight:500;font-size:.82rem}
+.tag{padding:2px 8px;border-radius:20px;font-size:.78rem;font-weight:700;background:var(--sky);color:var(--sea)}
+.tag.ok{background:transparent;border:1px solid var(--ok);color:var(--ok)}
+.tag.no{background:transparent;border:1px solid var(--amb);color:var(--ink)}
+.empty{color:var(--mut);padding:18px 0;text-align:center}
+.ph{width:44px;height:44px;border-radius:50%;object-fit:cover;vertical-align:middle}
+.pf{display:flex;gap:14px;align-items:center}.pf .ph{width:68px;height:68px}.pf h2{margin:0 0 2px}
+form img.ph{margin-top:6px}
+body.staff td .btn{display:none}
+[hidden]{display:none!important}
+header{max-width:none;margin:0;padding:12px 16px;background:#2a7ba6;color:#fff;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+header h1{font-size:1.1rem;letter-spacing:.03em;flex:1}
+header nav{border:0;overflow:visible}
+header nav button{color:#fff;border:1px solid rgba(255,255,255,.6);border-radius:6px;padding:6px 12px;min-height:36px}
+#mb{display:none;background:none;border:1px solid rgba(255,255,255,.6);color:#fff;border-radius:6px;font-size:1.1rem;min-height:36px;cursor:pointer}
+#wrap{display:flex;align-items:flex-start}
+#side{width:240px;flex:none;background:var(--sky);align-self:stretch;min-height:calc(100vh - 60px)}
+#side:empty{display:none}
+#wrap main{flex:1;min-width:0;max-width:1100px;margin:0}
+.sg,.sl{display:flex;justify-content:space-between;width:100%;text-align:left;background:none;border:0;font:inherit;color:var(--ink);cursor:pointer;padding:11px 16px;border-bottom:1px solid var(--line)}
+.sg{font-weight:700}
+.sl{padding-left:32px;color:var(--mut);border-bottom:0}
+.sg[aria-current="true"],.sl[aria-current="true"]{color:var(--sea);font-weight:700}
+@media (max-width:760px){#wrap{flex-direction:column}#side{width:100%;min-height:0}#side.shut{display:none}#mb:not([hidden]){display:inline-block}}
+@media print{header,#side,.tools,button,.noprint{display:none!important}:root:root:root{--bg:#fff;--card:#fff;--ink:#000;--mut:#333;--line:#bbb;--sky:#fff}body{background:#fff;color:#000}.rp{border:0!important}}
+body.out{min-height:100vh;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='170' height='130'><g font-family='monospace' font-size='22' fill='rgb(121,227,255)' fill-opacity='.28'><text x='6' y='26'>1 0 1 1 0</text><text x='52' y='70'>0 1 0 0 1</text><text x='14' y='112'>1 1 0 1 0</text></g></svg>"),linear-gradient(135deg,#0a2a6b,#1d78c9 55%,#19b3d6)}
+body.out header{display:none}
+body.out #wrap main{margin:0 auto;max-width:440px}
+.lg{text-align:center;color:#fff;margin-top:6vh}
+.lg span{display:inline-grid;place-items:center;width:84px;height:84px;border-radius:50%;background:#fff;font-size:2.6rem;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.lg b{display:block;margin-top:8px;font-size:1.3rem;letter-spacing:.1em}
+.lc{margin-top:14px;background:#12253a;color:#fff;border-radius:6px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.lc h2{margin:0;padding:14px;text-align:center;font-size:1.6rem;border-bottom:1px solid #2d4560}
+.lc form{display:block;padding:18px}
+.lc label{color:#fff;margin-bottom:12px}
+.lc input{background:#f2efe3;color:#222;width:100%}
+.pw{display:flex}.pw input{flex:1;min-width:0}
+.pw button{background:#e4e1d6;border:1px solid #bbb;min-width:46px;cursor:pointer}
+.lc .btn.go{background:#2d7a52;width:100%;margin-top:6px}
+.lc .msg{color:#ff9d8f}
+.rp{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+.rh{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;border-bottom:2px solid #2a7ba6;padding-bottom:8px;margin-bottom:12px}
+.rh b{font-size:1.3rem;color:#2a7ba6}
+.sig{display:flex;justify-content:space-between;gap:12px;margin-top:48px}
+.sig span{border-top:1px solid var(--ink);padding-top:4px;min-width:120px;text-align:center;font-size:.85rem}
+.msg{color:var(--bad);font-size:.88rem;grid-column:1/-1;margin:0}
+@media (prefers-reduced-motion:no-preference){nav button{transition:color .15s}}
+</style>
+</head>
+<body>
+<header><button id="mb" data-menu="1" aria-label="Menu" hidden>☰</button><h1 id="ttl">RENT WORK</h1><nav id="nav"></nav></header>
+<div id="wrap"><aside id="side" aria-label="Menu"></aside><main id="app"></main></div>
+<script>
+var KEY="diiwaan-guryaha-v1";
+var D={houses:[],landlords:[],tenants:[],contracts:[],payments:[],staff:[],admin:null};
+var view="dash",q="",err="",eid=null,sess=null,lerr="";
+
+
+function save(){}
+function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function money(n){return "$"+Number(n||0).toLocaleString("en-US")}
+function today(){return new Date().toISOString().slice(0,10)}
+function by(c,id){return D[c].find(function(x){return x.id===id})}
+function activeC(hid){return D.contracts.find(function(c){return c.house===hid&&!c.end})}
+var DISTRICTS=["Boondheere","Cabdulcasiis","Darusalam","Dayniile","Dharkenley","Garasbaley","Gubadley","Hamar Jajab","Hamar Weyne","Hawl-wadaag","Heliwaa","Hodan","Kaaraan","Kaxda","Shangaani","Shibis","Waaberi","Wadajir","Warta Nabadda","Wardhiigleey","Yaaqshiid"];
+var TYPES=["Guri","Apartment","Dukaan","Qol kiro","Dhisme kale"];
+var SCH={
+ houses:{t:"Guryaha",one:"guri",f:[["code","Lambarka guriga","text",1],["district","Degmada",DISTRICTS,1],["addr","Xaafadda / goobta","text"],["type","Nooca",TYPES,1],["rooms","Qolalka","number"],["rent","Kirada bishii ($)","number",1],["landlord","Milkiilaha","@landlords",1]]},
+ landlords:{t:"Milkiilayaasha",one:"milkiile",f:[["name","Magaca oo buuxa","text",1],["phone","Taleefan","tel",1],["idn","Lambarka aqoonsiga","text"],["addr","Cinwaanka","text"],["photo","Sawirka milkiilaha","photo"]]},
+ tenants:{t:"Kireystayaasha",one:"kireyste",f:[["name","Magaca oo buuxa","text",1],["phone","Taleefan","tel",1],["idn","Lambarka aqoonsiga","text"],["job","Shaqada","text"],["fam","Tirada qoyska","number"],["photo","Sawirka kireystaha","photo"],["user","Username (gelitaanka)","text",1],["pass","Password","password",1],["skey","Secret Key","password",1],["gname","Magaca damiinka","text"],["gphone","Taleefanka damiinka","tel"],["gidn","Aqoonsiga damiinka","text"],["gphoto","Sawirka damiinka","photo"]]},
+ contracts:{t:"Heshiisyada",one:"heshiis",f:[["house","Guriga banaan","@vacant",1],["tenant","Kireystaha","@tenants",1],["start","Taariikhda bilowga","date",1],["rent","Kirada bishii ($)","number",1],["dep","Rahmad / dhiibo ($)","number"]]},
+ payments:{t:"Lacagaha",one:"lacag",f:[["contract","Heshiiska","@actives",1],["amount","Lacagta la bixiyay ($)","number",1],["date","Taariikhda","date",1],["note","Fiiro gaar ah","text"]]},
+ staff:{t:"Isticmaalayaasha (xog haye)",one:"isticmaale",f:[["name","Magaca oo buuxa","text",1],["phone","Taleefan","tel"],["district","Degmada uu xogta ka haysto",DISTRICTS,1],["user","Username","text",1],["pass","Password","password",1],["skey","Secret Key","password",1],["photo","Sawirka","photo"]]}
+};
+var NAV=[["dash","Dashboard"],["houses","Guryaha"],["landlords","Milkiilayaasha"],["tenants","Kireystayaasha"],["contracts","Heshiisyada"],["payments","Lacagaha"],["staff","Isticmaalayaasha"]];
+
+function opts(src,sel){
+  var list;
+  if(Array.isArray(src))list=src.map(function(x){return[x,x]});
+  else if(src==="@actives")list=D.contracts.filter(function(c){return !c.end}).map(function(c){var h=by("houses",c.house),t=by("tenants",c.tenant);return[c.id,(h?h.code:"?")+" · "+(t?t.name:"?")]});
+  else if(src==="@vacant")list=D.houses.filter(function(h){return !activeC(h.id)}).map(function(h){return[h.id,h.code+" · "+h.district]});
+  else list=D[src.slice(1)].map(function(x){return[x.id,x.name]});
+  return '<option value="">Dooro…</option>'+list.map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===sel?" selected":"")+'>'+esc(o[1])+'</option>'}).join("");
+}
+function formHTML(c){
+  var sc=SCH[c],E=eid?by(c,eid):null;
+  var h=sc.f.map(function(f){var v=E?E[f[0]]:undefined;
+    var inp=Array.isArray(f[2])||String(f[2]).charAt(0)==="@"
+      ?'<select name="'+f[0]+'"'+(f[3]?" required":"")+'>'+opts(f[2],v)+'</select>'
+      :f[2]==="photo"?'<input type="file" accept="image/*" data-ph="1"><input type="hidden" name="'+f[0]+'" value="'+esc(v||"")+'">'+(v?'<img class="ph" src="'+esc(v)+'" alt="">':"")
+      :'<input name="'+f[0]+'" type="'+f[2]+'"'+(f[2]==="number"?' min="0"':"")+((f[3]&&(f[2]!=="password"||!E))?" required":"")+' value="'+esc(v!==undefined?v:f[2]==="date"?today():"")+'" autocomplete="off">';
+    return '<label>'+f[1]+(f[3]?" *":"")+inp+'</label>';
+  }).join("");
+  return '<form id="f" class="panel">'+h+'<p class="msg" id="msg">'+esc(err)+'</p><button class="btn" type="submit">'+(E?"Kaydi isbeddelka":"Diiwaan geli "+sc.one)+'</button>'+(E?'<button class="btn ghost" type="button" data-cancel="1">Jooji</button>':"")+'</form>';
+}
+function rows(c){
+  var qq=q.toLowerCase();
+  var L=D[c].filter(function(x){return !qq||JSON.stringify(x).toLowerCase().indexOf(qq)>-1||(c==="contracts"&&(((by("houses",x.house)||{}).code||"")+((by("tenants",x.tenant)||{}).name||"")).toLowerCase().indexOf(qq)>-1)});
+  if(!L.length)return '<p class="empty">Weli wax lama diiwaan gelin. Buuxi foomka sare.</p>';
+  var head,body;
+  if(c==="houses"){head=["Lambar","Degmo","Nooca","Kiro","Milkiile","Xaalad"];
+    body=L.map(function(h){var a=activeC(h.id),l=by("landlords",h.landlord);return[h.id,[esc(h.code),esc(h.district),esc(h.type),money(h.rent),esc(l?l.name:"—"),a?'<span class="tag ok">La kireeyay</span>':'<span class="tag no">Banaan</span>']]})}
+  else if(c==="landlords"){head=["Sawir","Magac","Taleefan","Aqoonsi","Cinwaan","Guryo"];
+    body=L.map(function(x){return[x.id,[th(x.photo),esc(x.name),esc(x.phone),esc(x.idn||"—"),esc(x.addr||"—"),D.houses.filter(function(h){return h.landlord===x.id}).length]]})}
+  else if(c==="tenants"){head=["Sawir","Magac","Taleefan","Damiin","Sawir damiin","Username"];
+    body=L.map(function(x){return[x.id,[th(x.photo),esc(x.name),esc(x.phone),esc(x.gname||"—")+" "+esc(x.gphone||""),th(x.gphoto),esc(x.user||"—")]]})}
+  else if(c==="staff"){head=["Sawir","Magac","Degmo","Taleefan","Username"];body=L.map(function(x){return[x.id,[th(x.photo),esc(x.name),esc(x.district),esc(x.phone||"—"),esc(x.user)]]})}
+  else if(c==="payments"){head=["Taariikh","Guri","Kireyste","Lacag","Fiiro"];body=L.map(function(x){var k=by("contracts",x.contract),h=k&&by("houses",k.house),t=k&&by("tenants",k.tenant);return[x.id,[esc(x.date),esc(h?h.code:"—"),esc(t?t.name:"—"),money(x.amount),esc(x.note||"")]]})}
+  else{head=["Guri","Kireyste","Bilow","Kiro","Rahmad","Xaalad"];
+    body=L.map(function(x){var h=by("houses",x.house),t=by("tenants",x.tenant);return[x.id,[esc(h?h.code:"—"),esc(t?t.name:"—"),esc(x.start),money(x.rent),money(x.dep),x.end?'<span class="tag">Dhammaaday '+esc(x.end)+'</span>':'<span class="tag ok">Socda</span>']]})}
+  var extra=c==="contracts";
+  return '<div class="panel scroll"><table><thead><tr>'+head.map(function(t){return"<th>"+t+"</th>"}).join("")+'<th></th></tr></thead><tbody>'+
+    body.map(function(r){var it=by(c,r[0]);return"<tr>"+r[1].map(function(t){return"<td>"+t+"</td>"}).join("")+"<td>"+(extra&&it&&!it.end?'<button class="btn ghost sm" data-end="'+r[0]+'">Dhammee</button> ':"")+(c!=="contracts"?'<button class="btn ghost sm" data-edit="'+r[0]+'">Beddel</button> ':"")+'<button class="btn del sm" data-del="'+r[0]+'" data-c="'+c+'">Tir</button></td></tr>'}).join("")+"</tbody></table></div>";
+}
+function dash(){
+  var act=D.contracts.filter(function(c){return !c.end});
+  var rented=D.houses.filter(function(h){return activeC(h.id)}).length,vac=D.houses.length-rented;
+  var inc=act.reduce(function(a,c){return a+Number(c.rent||0)},0);
+  var pct=D.houses.length?Math.round(rented/D.houses.length*100):0;
+  var dist={};D.houses.forEach(function(h){dist[h.district]=(dist[h.district]||0)+1});
+  var keys=Object.keys(dist).sort(function(a,b){return dist[b]-dist[a]}),mx=Math.max.apply(null,keys.map(function(k){return dist[k]}).concat([1]));
+  var recent=D.contracts.slice(-5).reverse().map(function(x){var h=by("houses",x.house),t=by("tenants",x.tenant);return"<tr><td>"+esc(h?h.code:"—")+"</td><td>"+esc(t?t.name:"—")+"</td><td>"+money(x.rent)+"</td><td>"+esc(x.start)+"</td></tr>"}).join("");
+  var h='<div class="grid"><div class="stat big"><b>'+money(inc)+'</b><span>Dakhliga bishii (heshiisyada socda)</span></div>'+
+   '<div class="stat"><b>'+D.houses.length+'</b><span>Guryaha la diiwaan geliyay</span></div>'+
+   '<div class="stat"><b>'+rented+'</b><span>La kireeyay</span></div>'+
+   '<div class="stat"><b>'+vac+'</b><span>Banaan</span></div>'+
+   '<div class="stat"><b>'+D.landlords.length+'</b><span>Milkiilayaal</span></div>'+
+   '<div class="stat"><b>'+D.tenants.length+'</b><span>Kireystayaal</span></div><div class="stat"><b>'+money(D.payments.reduce(function(a,p){return a+Number(p.amount)},0))+'</b><span>Lacagaha la helay</span></div></div>'+
+   '<div class="panel"><h2>Buuxinta guryaha: '+pct+'%</h2><div class="occ" role="img" aria-label="'+pct+' boqolkiiba la kireeyay"><i style="width:'+pct+'%"></i></div><small style="color:var(--mut)">'+rented+' la kireeyay, '+vac+' banaan</small></div>'+
+   '<div class="panel"><h2>Guryaha degmo kasta</h2>'+(keys.length?keys.map(function(k){return'<div class="bar"><span>'+esc(k)+'</span><i style="width:'+Math.round(dist[k]/mx*60)+'%"></i><b>'+dist[k]+'</b></div>'}).join(""):'<p class="empty">Weli guri lama diiwaan gelin.</p>')+'</div>'+
+   '<div class="panel scroll"><h2>Heshiisyadii ugu dambeeyay</h2>'+(recent?'<table><thead><tr><th>Guri</th><th>Kireyste</th><th>Kiro</th><th>Bilow</th></tr></thead><tbody>'+recent+'</tbody></table>':'<p class="empty">Weli heshiis lama sameyn.</p>')+'</div>';
+  if(sess.role==="admin"&&!D.houses.length&&!D.landlords.length)h+='<button class="btn ghost" id="demo">Soo gali xog tusaale ah</button>';
+  if(sess.role==="admin")h+=xbtn();return h;
+}
+function scoped(R){var st=R.staff.find(function(x){return x.id===sess.id}),sd=st.district,me=sess.id;
+ var hs=R.houses.filter(function(h){return h.district===sd}),hi=hs.map(function(h){return h.id});
+ var cs=R.contracts.filter(function(c){return hi.indexOf(c.house)>-1}),ci=cs.map(function(c){return c.id}),ti=cs.map(function(c){return c.tenant}),li=hs.map(function(h){return h.landlord});
+ return Object.assign({},R,{houses:hs,contracts:cs,payments:R.payments.filter(function(p){return ci.indexOf(p.contract)>-1}),tenants:R.tenants.filter(function(t){return t.by===me||ti.indexOf(t.id)>-1}),landlords:R.landlords.filter(function(l){return l.by===me||li.indexOf(l.id)>-1})})}
+function render(){
+  var R=D;
+  if(sess&&sess.role==="staff"&&!by("staff",sess.id))sess=null;
+  try{render0()}finally{D=R}
+  if(sess&&sess.role==="staff"){var st=by("staff",sess.id);document.getElementById("app").insertAdjacentHTML("afterbegin",'<div class="panel pf">'+th(st.photo)+'<div><h2>'+esc(st.name)+'</h2><small>Xog haye: '+esc(st.district)+'</small></div></div>')}
+}
+function render0(){
+  document.body.className=sess?sess.role:"out";document.getElementById("side").innerHTML="";document.getElementById("mb").hidden=true;document.getElementById("ttl").textContent="RENT WORK";
+  if(!sess)return login();
+  if(sess.role==="user")return mine();
+  document.getElementById("nav").innerHTML='<button data-out="1">Ka bax</button>';document.getElementById("side").innerHTML=sidebar();var st0=sess.role==="staff"?by("staff",sess.id):null;document.getElementById("ttl").textContent="RENT WORK"+(st0?": "+st0.district.toUpperCase():"");document.getElementById("mb").hidden=false;
+  var a=document.getElementById("app");
+  if(view==="dash")a.innerHTML=dash();
+  else if(view==="arrears"||view==="bills"||view==="reports")a.innerHTML=extra(view);
+  else{
+    var warn="";if(view==="payments"&&!D.contracts.some(function(c){return !c.end}))warn='<p class="panel">Marka hore samee heshiis socda.</p>';
+    if(view==="houses"&&!D.landlords.length)warn='<p class="panel">Marka hore diiwaan geli milkiile.</p>';
+    if(view==="contracts"&&(!D.tenants.length||!D.houses.length))warn='<p class="panel">Heshiis ka hor, diiwaan geli guri iyo kireyste.</p>';
+    a.innerHTML='<h2>'+SCH[view].t+'</h2>'+warn+formHTML(view)+'<div class="tools"><input id="q" type="search" placeholder="Raadi..." value="'+esc(q)+'" aria-label="Raadi"></div><div id="list">'+rows(view)+'</div>';
+    err="";
+  }
+}
+document.addEventListener("click",async function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.eye){var ei=document.querySelector('[name="'+b.dataset.eye+'"]');ei.type=ei.type==="password"?"text":"password";return}
+  if(b.dataset.menu){document.getElementById("side").classList.toggle("shut");return}
+  if(b.dataset.g){OPEN[b.dataset.g]=!OPEN[b.dataset.g];render();return}
+  if(b.dataset.pr){print();return}
+  if(b.dataset.gen){var g=function(i){var e=document.getElementById(i);return e?e.value.trim():""};rp={q:g("p_q"),f:g("p_f"),t:g("p_t")};gen=true;render();return}
+  if(b.dataset.out){await api("POST","/api/logout");sess=null;render();return}
+  if(!sess||sess.role==="user")return;
+  if(sess.role!=="admin"&&(b.dataset.v==="staff"||b.dataset.del||b.dataset.edit||b.dataset.end||b.dataset.xe||b.dataset.xi||b.dataset.cancel))return;
+  if(b.dataset.edit){eid=b.dataset.edit;render();scrollTo(0,0);return}
+  if(b.dataset.cancel){eid=null;render();return}
+  if(b.dataset.xe){xexp(b.dataset.xe==="2");return}
+  if(b.dataset.xi){document.getElementById("xf").click();return}
+  if(b.dataset.v){view=b.dataset.v;q="";eid=null;rep="";rid="";if(innerWidth<760)document.getElementById("side").classList.add("shut");render();return}
+  if(b.dataset.del){if(!confirm("Ma hubtaa inaad tirto diiwaankan?"))return;var r=await api("DELETE","/api/"+b.dataset.c+"/"+b.dataset.del);if(r.error)alert(r.error);else await load();return}
+  if(b.dataset.end){if(confirm("Dhammee heshiiskan? Guriga wuu banaanaan doonaa.")){await api("POST","/api/contracts/"+b.dataset.end+"/end");await load()}return}
+});
+document.addEventListener("submit",async function(e){
+  e.preventDefault();
+  if(e.target.id==="lf"){await doLogin(e.target);return}
+  if(!sess||sess.role==="user")return;
+  var o={},fd=new FormData(e.target);fd.forEach(function(v,k){o[k]=String(v).trim()});
+  if(eid)o.id=eid;
+  var r=await api("POST","/api/"+view,o);
+  if(r.error){err=r.error;render();return}
+  eid=null;await load();
+});
+document.addEventListener("input",function(e){
+  if(e.target.id==="q"){q=e.target.value;document.getElementById("list").innerHTML=rows(view)}
+  if(e.target.name==="house"&&view==="contracts"){var h=by("houses",e.target.value),r=document.querySelector('[name="rent"]');if(h&&r&&!r.value)r.value=h.rent}
+});
+function th(u){return u?'<img class="ph" src="'+esc(u)+'" alt="">':"—"}
+async function sha(t){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("dg1:"+t));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0")}).join("")}
+function shrink(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,260/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.7))};im.src=r.result};r.readAsDataURL(file)}
+document.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.ph&&t.files[0])shrink(t.files[0],function(u){t.nextElementSibling.value=u;var p=t.parentNode.querySelector("img.ph");if(!p){p=document.createElement("img");p.className="ph";p.alt="";t.parentNode.appendChild(p)}p.src=u})});
+function login(){
+ document.getElementById("nav").innerHTML="";
+ document.getElementById("app").innerHTML='<div class="lg"><span>🏠</span><b>RENT WORK</b></div><div class="lc"><h2>Login</h2><form id="lf"><label>Username<input name="user" required autocomplete="username" placeholder="Username"></label><label>Password<span class="pw"><input name="pass" type="password" required autocomplete="current-password" placeholder="password"><button type="button" data-eye="pass" aria-label="Muuji">👁</button></span></label><label>Secret Key<span class="pw"><input name="key" type="password" required autocomplete="off" placeholder="Secret Key"><button type="button" data-eye="key" aria-label="Muuji">👁</button></span></label><p class="msg">'+esc(lerr)+'</p><button class="btn go" type="submit">Gudbi foomka</button></form></div>'}
+async function doLogin(f){var r=await api("POST","/api/login",{user:f.user.value.trim(),pass:f.pass.value,key:f.key.value});if(r.error){lerr=r.error;render();return}lerr="";view="dash";await load()}
+var rp={q:"",f:"",t:""},gen=false;
+function inr(d){d=String(d||"");return(!rp.f||d>=rp.f)&&(!rp.t||d<=rp.t)}
+function p9(s){return String(s||"").replace(/\D/g,"").slice(-9)}
+function who(x,l){return'<div class="pf" style="margin:8px 0">'+th(x.photo)+'<div><b>'+l+': '+esc(x.name)+'</b><br>Tel: '+esc(x.phone)+' · Aqoonsi: '+esc(x.idn||"—")+(x.addr?' · '+esc(x.addr):"")+(x.job?' · Shaqo: '+esc(x.job):"")+(x.gname?'<br>Damiin: '+esc(x.gname)+' '+esc(x.gphone||"")+' '+esc(x.gidn||""):"")+'</div></div>'}
+function sum(ps){return ps.reduce(function(a,p){return a+Number(p.amount)},0)}
+function plist(ps){return tbl(["Taariikh","Guri","Kireyste","Lacag","Fiiro"],ps.map(function(p){var k=by("contracts",p.contract),h=k&&by("houses",k.house),t=k&&by("tenants",k.tenant);return[esc(p.date),esc(h?h.code:"—"),esc(t?t.name:"—"),money(p.amount),esc(p.note||"")]}))+'<p><b>Wadarta lacagaha: '+money(sum(ps))+'</b></p>'}
+function rpt(title,body){return'<div class="rp"><div class="rh"><b>RENT WORK</b><span>'+esc(title)+'</span><small>'+esc(rp.f)+' → '+esc(rp.t)+' · La daabacay: '+today()+'</small></div>'+body+'<div class="sig"><span>Saxiixa admin</span><span>Saxiixa</span><span>Shaabad</span></div><p><button class="btn sm" data-pr="1">Daabac</button></p></div>'}
+function genrep(){
+ var ps=D.payments.filter(function(p){return inr(p.date)}),cs=function(f){return D.contracts.filter(f)};
+ var inC=function(a){return ps.filter(function(p){return a.some(function(c){return c.id===p.contract})})};
+ if(rep==="pay")return rpt("Payments (Lacagaha)",plist(ps));
+ if(rep==="hreg")return rpt("Guri Registrations",tbl(["Lambar","Degmo","Nooca","Kiro","Milkiile","Diiwaan geliyay"],D.houses.filter(function(h){return inr(h.at)}).map(function(h){var l=by("landlords",h.landlord);return[esc(h.code),esc(h.district),esc(h.type),money(h.rent),esc(l?l.name:"—"),esc(h.at||"—")]})));
+ if(rep==="zone"){if(!rp.q)return'<p class="empty">Dooro degmo.</p>';var hs=D.houses.filter(function(h){return h.district===rp.q}),k2=cs(function(c){return hs.some(function(h){return h.id===c.house})});
+  return rpt("Degmo Statement: "+rp.q,tbl(["Guri","Nooca","Kiro","Milkiile","Kireyste","La helay"],hs.map(function(h){var a=activeC(h.id),t=a&&by("tenants",a.tenant),l=by("landlords",h.landlord);return[esc(h.code),esc(h.type),money(h.rent),esc(l?l.name:"—"),esc(t?t.name:"Banaan"),money(sum(inC(k2.filter(function(c){return c.house===h.id}))))]}))+'<p><b>Wadarta la helay: '+money(sum(inC(k2)))+'</b></p>')}
+ if(rep==="land"){var l=D.landlords.find(function(x){return p9(x.phone)&&p9(x.phone)===p9(rp.q)});if(!l)return'<p class="empty">Milkiile taleefankaas leh lama helin.</p>';var hs2=D.houses.filter(function(h){return h.landlord===l.id}),c3=cs(function(c){return hs2.some(function(h){return h.id===c.house})});
+  return rpt("Milkiile Statement",who(l,"Milkiile")+tbl(["Guri","Degmo","Kiro","Kireyste","Taleefan"],hs2.map(function(h){var a=activeC(h.id),t=a&&by("tenants",a.tenant);return[esc(h.code),esc(h.district),money(h.rent),esc(t?t.name:"Banaan"),esc(t?t.phone:"")]}))+plist(inC(c3)))}
+ if(rep==="ten"){var t2=D.tenants.find(function(x){return p9(x.phone)&&p9(x.phone)===p9(rp.q)});if(!t2)return'<p class="empty">Kireyste taleefankaas leh lama helin.</p>';var c4=cs(function(c){return c.tenant===t2.id}),ak=c4.find(function(c){return !c.end}),hh=ak&&by("houses",ak.house),ll=hh&&by("landlords",hh.landlord);
+  return rpt("Kireyste Statement",who(t2,"Kireyste")+(ll?who(ll,"Milkiile"):"")+(hh?'<p>Guri: <b>'+esc(hh.code)+'</b> · '+esc(hh.district)+' · Kiro: '+money(ak.rent)+' · Haraaga: <b>'+money(Math.max(calc(ak).bal,0))+'</b></p>':"")+plist(inC(c4)))}
+ if(rep==="house"){var h3=D.houses.find(function(h){return h.code.toLowerCase()===rp.q.toLowerCase()});if(!h3)return'<p class="empty">Guri lambarkaas leh lama helin.</p>';var a3=activeC(h3.id),t3=a3&&by("tenants",a3.tenant),l3=by("landlords",h3.landlord);
+  return rpt("Guri Statement",'<p>Guri <b>'+esc(h3.code)+'</b> · '+esc(h3.type)+' · '+esc(h3.district)+(h3.addr?', '+esc(h3.addr):"")+' · Kiro: '+money(h3.rent)+'</p>'+(l3?who(l3,"Milkiile"):"")+(t3?who(t3,"Kireyste"):'<p>Guriga waa banaan.</p>')+plist(inC(cs(function(c){return c.house===h3.id}))))}
+ return""}
+var OPEN={reg:true,bill:true,rec:true},rep="",rid="";
+var MENU=[["dash","Dashboard"],["g","reg","Diiwaangelin",[["houses","Guryaha"],["landlords","Milkiilayaasha"],["tenants","Kireystayaasha"],["contracts","Heshiisyada"]]],["g","bill","Lacagaha (Billing)",[["payments","Bixinta lacagaha"],["bills","Biilasha bisha"]]],["g","rec","Deymaha (Receivable)",[["arrears","Lacagaha ku dhiman"]]],["reports","Warbixinada (Reports)"],["staff","Isticmaalayaasha"]];
+function sidebar(){return MENU.map(function(m){
+ if(m[0]==="staff"&&sess.role!=="admin")return"";
+ if(m[0]!=="g")return'<button class="sg" data-v="'+m[0]+'" aria-current="'+(view===m[0])+'">'+m[1]+'</button>';
+ return'<button class="sg" data-g="'+m[1]+'">'+m[2]+'<span>'+(OPEN[m[1]]?"▾":"▸")+'</span></button>'+(OPEN[m[1]]?m[3].map(function(x){return'<button class="sl" data-v="'+x[0]+'" aria-current="'+(view===x[0])+'">'+x[1]+'</button>'}).join(""):"")}).join("")}
+function calc(k){var s=new Date(k.start),n=new Date(),m=Math.max(1,(n.getFullYear()-s.getFullYear())*12+n.getMonth()-s.getMonth()+1),p=D.payments.filter(function(x){return x.contract===k.id}).reduce(function(a,x){return a+Number(x.amount)},0);return{m:m,due:m*Number(k.rent),paid:p,bal:m*Number(k.rent)-p}}
+function tbl(hd,rows){return rows.length?'<div class="panel scroll"><table><thead><tr>'+hd.map(function(x){return"<th>"+x+"</th>"}).join("")+'</tr></thead><tbody>'+rows.map(function(r){return"<tr>"+r.map(function(c){return"<td>"+c+"</td>"}).join("")+"</tr>"}).join("")+'</tbody></table></div>':'<p class="empty">Xog lama helin.</p>'}
+function hn(k){var h=by("houses",k.house),t=by("tenants",k.tenant);return[esc(h?h.code:"—"),esc(t?t.name:"—"),esc(t?t.phone:"")]}
+function extra(v){
+ var act=D.contracts.filter(function(c){return !c.end});
+ if(v==="arrears"){var L=act.map(function(k){return[k,calc(k)]}).sort(function(a,b){return b[1].bal-a[1].bal});
+  return'<h2>Lacagaha ku dhiman (Accounts Receivable)</h2><div class="grid"><div class="stat big"><b>'+money(L.reduce(function(a,x){return a+Math.max(x[1].bal,0)},0))+'</b><span>Wadarta deynta</span></div><div class="stat"><b>'+L.filter(function(x){return x[1].bal>0}).length+'</b><span>Kireystayaal deyn leh</span></div></div>'+tbl(["Guri","Kireyste","Taleefan","Bilo","La rabay","La bixiyay","Haraaga","Xaalad"],L.map(function(x){return hn(x[0]).concat([x[1].m,money(x[1].due),money(x[1].paid),money(Math.max(x[1].bal,0)),x[1].bal>0?'<span class="tag no">Deyn</span>':'<span class="tag ok">Bixiyay</span>'])}))}
+ if(v==="bills"){var ym=today().slice(0,7);return'<h2>Biilasha bisha '+ym+'</h2>'+tbl(["Guri","Kireyste","Taleefan","Kirada bisha","La bixiyay","Xaalad"],act.map(function(k){var p=D.payments.filter(function(x){return x.contract===k.id&&String(x.date).slice(0,7)===ym}).reduce(function(a,x){return a+Number(x.amount)},0);return hn(k).concat([money(k.rent),money(p),p>=Number(k.rent)?'<span class="tag ok">La bixiyay</span>':'<span class="tag no">Aan la bixin</span>'])}))}
+ var T=[["pay","Payments (Lacagaha)"],["land","Milkiile Statement"],["ten","Kireyste Statement"],["house","Guri Statement"],["hreg","Guri Registrations"],["zone","Degmo Statement"]];
+ var o='<h2>Reports</h2><div class="panel noprint"><label>Report Types<select id="rt"><option value="">Select an Option…</option>'+T.map(function(t){return'<option value="'+t[0]+'"'+(rep===t[0]?" selected":"")+'>'+t[1]+'</option>'}).join("")+'</select></label></div>';
+ if(rep){var lb={land:"Taleefanka milkiilaha",ten:"Taleefanka kireystaha",house:"Lambarka guriga"}[rep];
+  o+='<div class="panel noprint"><h2>Report Parameters</h2>'+(lb?'<label>'+lb+'<input id="p_q" value="'+esc(rp.q)+'"></label>':rep==="zone"?'<label>Degmada<select id="p_q">'+opts(DISTRICTS,rp.q)+'</select></label>':"")+'<label style="margin-top:8px">Start Date<input type="date" id="p_f" value="'+(rp.f||today().slice(0,8)+"01")+'"></label><label style="margin-top:8px">End Date<input type="date" id="p_t" value="'+(rp.t||today())+'"></label><button class="btn" style="background:var(--ok);margin-top:12px" data-gen="1">Generate Report</button></div>'}
+ if(rep&&gen)o+=genrep();
+ return o}
+document.addEventListener("change",function(e){if(e.target.id==="rt"){rep=e.target.value;gen=false;render()}if(e.target.id==="rid"){rid=e.target.value;render()}});
+function mine(){
+ document.getElementById("nav").innerHTML='<button aria-current="true">Xogtayda</button><button data-out="1" style="margin-left:auto">Ka bax</button>';
+ var t=by("tenants",sess.id);if(!t){sess=null;return render()}
+ var k=D.contracts.find(function(c){return c.tenant===t.id&&!c.end}),h=k&&by("houses",k.house),l=h&&by("landlords",h.landlord);
+ var pay=k?D.payments.filter(function(p){return p.contract===k.id}):[],paid=pay.reduce(function(a,p){return a+Number(p.amount)},0),due=0;
+ if(k){var s=new Date(k.start),n=new Date();due=Math.max(1,(n.getFullYear()-s.getFullYear())*12+n.getMonth()-s.getMonth()+1)*Number(k.rent)}
+ var bal=due-paid;
+ document.getElementById("app").innerHTML='<div class="panel pf">'+th(t.photo)+'<div><h2>'+esc(t.name)+'</h2><small>'+esc(t.phone)+'</small></div></div>'+
+ (k?'<div class="grid"><div class="stat big"><b>'+money(k.rent)+'</b><span>Kirada bishii</span></div><div class="stat"><b>'+money(paid)+'</b><span>Lacagta aad bixisay</span></div><div class="stat"><b>'+money(Math.max(bal,0))+'</b><span>'+(bal>0?"Lacagta ku dhiman":"Wax kuu dhiman ma jiro")+'</span></div></div>':'<p class="panel">Weli heshiis laguu samayn.</p>')+
+ (h?'<div class="panel"><h2>Gurigaaga</h2>'+esc(h.code)+' · '+esc(h.type)+' · '+esc(h.district)+(h.addr?', '+esc(h.addr):"")+'</div>':"")+
+ (l?'<div class="panel pf">'+th(l.photo)+'<div><h2>Milkiilaha</h2>'+esc(l.name)+'<br><small>'+esc(l.phone)+'</small></div></div>':"")+
+ (t.gname?'<div class="panel pf">'+th(t.gphoto)+'<div><h2>Damiinkaaga</h2>'+esc(t.gname)+'<br><small>'+esc(t.gphone||"")+'</small></div></div>':"")+
+ '<div class="panel scroll"><h2>Lacagaha aad bixisay</h2>'+(pay.length?'<table><thead><tr><th>Taariikh</th><th>Lacag</th><th>Fiiro</th></tr></thead><tbody>'+pay.slice().reverse().map(function(p){return'<tr><td>'+esc(p.date)+'</td><td>'+money(p.amount)+'</td><td>'+esc(p.note||"")+'</td></tr>'}).join("")+'</tbody></table>':'<p class="empty">Weli lacag lama diiwaan gelin.</p>')+'</div>'}
+var XH={landlords:["Magac","Taleefan","Aqoonsi","Cinwaan"],houses:["Lambar","Degmo","Xaafad","Nooca","Qolal","Kiro","Milkiile"],tenants:["Magac","Taleefan","Aqoonsi","Shaqo","Qoys","Magac damiin","Taleefan damiin","Aqoonsi damiin","Username"],contracts:["Guri","Kireyste","Bilow","Kiro","Rahmad","Dhammaad"],payments:["Taariikh","Guri","Kireyste","Lacag","Fiiro"]};
+var XN={landlords:"Milkiilayaasha",houses:"Guryaha",tenants:"Kireystayaasha",contracts:"Heshiisyada",payments:"Lacagaha"};
+function nm(c,id){var x=by(c,id);return x?(x.name||x.code):""}
+function xrows(c){return D[c].map(function(x){
+ if(c==="landlords")return[x.name,x.phone,x.idn,x.addr];
+ if(c==="houses")return[x.code,x.district,x.addr,x.type,x.rooms,x.rent,nm("landlords",x.landlord)];
+ if(c==="tenants")return[x.name,x.phone,x.idn,x.job,x.fam,x.gname,x.gphone,x.gidn,x.user];
+ if(c==="contracts")return[nm("houses",x.house),nm("tenants",x.tenant),x.start,x.rent,x.dep,x.end||""];
+ var k=by("contracts",x.contract);return[x.date,k?nm("houses",k.house):"",k?nm("tenants",k.tenant):"",x.amount,x.note]})}
+function xbtn(){return'<div class="tools"><button class="btn ghost sm" data-xe="1">Soo deji Excel</button><button class="btn ghost sm" data-xe="2">Template madhan</button><button class="btn ghost sm" data-xi="1">Soo geli Excel</button><input type="file" id="xf" accept=".xlsx,.xls" hidden></div>'}
+async function xexp(blank){
+ if(typeof XLSX==="undefined"){alert("Maktabadda Excel lama soo gelin. Hubi internetka.");return}
+ var wb=XLSX.utils.book_new();
+ Object.keys(XH).forEach(function(c){XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([XH[c]].concat(blank?[]:xrows(c))),XN[c])});
+ var buf=XLSX.write(wb,{type:"array",bookType:"xlsx"});
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([buf],{type:"application/octet-stream"}));a.download=(blank?"template-diiwaan":"diiwaan-guryaha")+".xlsx";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000)}
+function ximp(file){
+ if(typeof XLSX==="undefined"){alert("Maktabadda Excel lama soo gelin.");return}
+ var r=new FileReader();r.onload=async function(){
+  var wb=XLSX.read(r.result,{type:"array"}),b={};
+  ["landlords","houses","tenants"].forEach(function(k){var ws=wb.Sheets[XN[k]];b[k]=ws?XLSX.utils.sheet_to_json(ws,{header:1,defval:""}).slice(1).filter(function(x){return String(x[0]).trim()}):[]});
+  var s=await api("POST","/api/import",b);
+  if(s.error){alert(s.error);return}
+  alert("La soo geliyay: "+s.l+" milkiile, "+s.h+" guri, "+s.t+" kireyste. La ka booday: "+s.sk+".");await load()};
+ r.readAsArrayBuffer(file)}
+document.addEventListener("change",function(e){if(e.target.id==="xf"&&e.target.files[0]){ximp(e.target.files[0]);e.target.value=""}});
+async function api(m,u,b){try{var r=await fetch(u,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined,credentials:"same-origin"});var j={};try{j=await r.json()}catch(e){}if(!r.ok&&!j.error)j.error="Khalad ("+r.status+")";return j}catch(e){return{error:"Server-ka lama gaari karo."}}}
+async function load(){var r=await api("GET","/api/data");if(r.error||!r.role){sess=null;render();return}sess={role:r.role,id:r.id};D=Object.assign({houses:[],landlords:[],tenants:[],contracts:[],payments:[],staff:[]},r.data);render()}
+load();
+</script>
+</body>
+</html>
